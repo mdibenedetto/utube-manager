@@ -98,7 +98,7 @@ function attachAnchorListeners() {
       const utubeURL = parseParamVideoUrl(anchor.href)[0];
 
       const title = await fetch(
-        "http://textance.herokuapp.com/title/" + utubeURL
+        "https://textance.herokuapp.com/title/" + utubeURL
       ).then((res) => res.text());
 
       anchor.setAttribute("title", title);
