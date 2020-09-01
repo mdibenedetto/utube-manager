@@ -102,6 +102,8 @@ function attachAnchorListeners() {
       ).then((res) => res.text());
 
       anchor.setAttribute("title", title);
+      anchor.innerText = title;
+
       anchor.removeEventListener("mouseover", _mouseover);
     });
   });
