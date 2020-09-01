@@ -10,8 +10,8 @@ const iframe = document.querySelector("#player");
 const btnParseUrl = document.querySelector("#txtUrl");
 
 document.addEventListener("DOMContentLoaded", () => {
-  loadHistory();
-  refreshHistoryList();
+  loadState();
+  syncState();
   setSourceFromWindowParam();
 });
 
@@ -39,7 +39,7 @@ function setSource() {
 async function processVideoCode() {
   await pasteClipBoard();
   parseYoutubeVideoUrl();
-  refreshHistoryList();
+  syncState();
 }
 
 function parseYoutubeVideoUrl() {
@@ -69,12 +69,17 @@ async function pasteClipBoard() {
   txtUrl.value = text;
 }
 
-function refreshHistoryList() {
+function syncState() {
+  loadHistory(state.stateHistory);
+  loadButtonState(state.isHistoryHidden);
+}
+
+function loadHistory(stateHistory) {
   const listHistory = document.querySelector("#listHistory");
 
   listHistory.innerHTML = "";
 
-  stateHistory.forEach((item, index) => {
+  (stateHistory || []).forEach((item, index) => {
     listHistory.insertAdjacentHTML(
       "beforeend",
       `<li class="list-group-item">
@@ -89,15 +94,20 @@ function refreshHistoryList() {
   });
 }
 
+function loadButtonState(isHistoryHidden = null) {
+  document.body.classList.toggle("is-history-hidden", isHistoryHidden);
+}
+
 function btnRemoveClick(index) {
   if (confirm("Are you sure to want to remove this video url?")) {
     removeVideoFromHistory(index);
-    refreshHistoryList();
+    syncState();
   }
 }
 
 function btnToggleHistoryClick() {
-  document.body.classList.toggle("close-history-panel");
+  updateToggleHistory();
+  loadButtonState(state.isHistoryHidden);
 }
 /*
    const REGEX = /(?<=watch\?v=).*(?=[&\s])/;
