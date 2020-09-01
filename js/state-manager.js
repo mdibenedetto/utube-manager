@@ -1,4 +1,12 @@
 const HISTORY_KEY = "utube-history";
+const PARAM_NAME = "videoUrl";
+
+/*
+   const REGEX = /(?<=watch\?v=).*(?=[&\s])/;
+  https://www.youtube.com/watch?v=code_code
+  https://www.youtube.com/watch?v=code_code&some_other_code
+  */
+
 let state = {
   stateHistory: [],
   isHistoryHidden: false,
@@ -40,4 +48,26 @@ function getYoutubeVideoCode(rawUrl) {
 
 function updateState() {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(state));
+}
+
+function parseInputVideoUrl(rawVideoUrl) {
+  const template = "https://www.youtube.com/embed/";
+  let parsedUrl, source;
+
+  if (rawVideoUrl.includes("www.youtube.com/embed/")) {
+    source = rawVideoUrl;
+  } else {
+    parsedUrl = getYoutubeVideoCode(rawVideoUrl);
+    source = template + parsedUrl;
+  }
+
+  return source;
+}
+
+function parseParamVideoUrl(search) {
+  const PARAM_NAME = "videoUrl";
+
+  var REGEX = new RegExp(`(?<=${PARAM_NAME}=).*$`);
+  const videoUrl = search.match(REGEX);
+  return videoUrl;
 }

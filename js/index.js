@@ -13,46 +13,26 @@ document.addEventListener("DOMContentLoaded", () => {
   loadState();
   syncState();
   setSourceFromWindowParam();
+  attachAnchorListeners();
 });
 
 function setSourceFromWindowParam() {
-  const PARAM_NAME = "videoUrl";
   const { search } = window.location;
-
   if (search.includes(PARAM_NAME)) {
-    var REGEX = new RegExp(`(?<=${PARAM_NAME}=).*$`);
-    const videoUrl = search.match(REGEX);
-    txtUrl.value = videoUrl;
-    parseYoutubeVideoUrl();
+    txtUrl.value = parseParamVideoUrl(search);
+    onParseYoutubeVideoUrl();
   }
 }
 
-function selectText() {
-  txtUrl.select();
-}
-
-function setSource() {
-  const source = txtUrl.value.trim();
-  iframe.setAttribute("src", source);
-}
-
-async function processVideoCode() {
-  await pasteClipBoard();
-  parseYoutubeVideoUrl();
+async function onProcessVideoCode() {
+  await onPasteClipBoard();
+  onParseYoutubeVideoUrl();
   syncState();
 }
 
-function parseYoutubeVideoUrl() {
+function onParseYoutubeVideoUrl() {
   const rawVideoUrl = txtUrl.value.trim();
-  const template = "https://www.youtube.com/embed/";
-  let parsedUrl, source;
-
-  if (rawVideoUrl.includes("www.youtube.com/embed/")) {
-    source = rawVideoUrl;
-  } else {
-    parsedUrl = getYoutubeVideoCode(rawVideoUrl);
-    source = template + parsedUrl;
-  }
+  const source = parseInputVideoUrl(rawVideoUrl);
 
   if (!source) {
     alert(`The url: ${rawVideoUrl} cannot be parsed :( `);
@@ -63,8 +43,8 @@ function parseYoutubeVideoUrl() {
   }
 }
 
-async function pasteClipBoard() {
-  selectText();
+async function onPasteClipBoard() {
+  txtUrl.select();
   const text = await navigator.clipboard.readText();
   txtUrl.value = text;
 }
@@ -105,12 +85,24 @@ function btnRemoveClick(index) {
   }
 }
 
-function btnToggleHistoryClick() {
+function onToggleHistoryClick() {
   updateToggleHistory();
   loadButtonState(state.isHistoryHidden);
 }
-/*
-   const REGEX = /(?<=watch\?v=).*(?=[&\s])/;
-  https://www.youtube.com/watch?v=code_code
-  https://www.youtube.com/watch?v=code_code&some_other_code
-  */
+
+function attachAnchorListeners() {
+  const anchors = document.querySelectorAll("a");
+
+  anchors.forEach((anchor) => {
+    anchor.addEventListener("mouseover", async function _mouseover() {
+      const utubeURL = parseParamVideoUrl(anchor.href)[0];
+
+      const title = await fetch(
+        "http://textance.herokuapp.com/title/" + utubeURL
+      ).then((res) => res.text());
+
+      anchor.setAttribute("title", title);
+      anchor.removeEventListener("mouseover", _mouseover);
+    });
+  });
+}
