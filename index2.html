@@ -1,0 +1,50 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css" />
+  
+  </head>
+  <body>
+    <div class="input-container">
+      <div>
+        <label class="left-block">
+          <a
+            target="_blank"
+            href="https://github.com/mdibenedetto/code.training/blob/master/iframe-player.html"
+          >
+            source code >>
+          </a>
+        </label>
+        <button id="btnParseUrl" onclick="parseYoutubeVideoUrl()">
+          Parse Video Code
+        </button>
+        <button id="btnPasteClipboard" onclick="pasteClipBoard()">
+          Paste Clipboard
+        </button>
+      </div>
+
+      <div style="width: 100%;">
+        <label class="left-block">
+          Youtube video Url (ex. "https://www.youtube.com/embed/someThing")
+        </label>
+        <input
+          id="txtUrl"
+          type="text"
+          value="https://www.youtube.com/embed"
+          onchange="setSource();"
+          ondblclick="selectText()"
+        />
+      </div>
+    </div>
+
+    <iframe
+      id="player"
+      width="100%"
+      height="90%"
+      src="https://www.youtube.com/embed"
+      frameborder="0"
+      allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+    ></iframe> 
+    <script src="./script.js"></script>
+  </body>
+</html>
