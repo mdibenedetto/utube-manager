@@ -45,40 +45,39 @@ function onParseYoutubeVideoUrl() {
 
 async function onPasteClipBoard() {
   txtUrl.select();
-  const text = await navigator.clipboard.readText();
-  txtUrl.value = text;
+  txtUrl.value = await navigator.clipboard.readText();
 }
 
 function syncState() {
-  loadHistory(state.stateHistory);
-  loadButtonState(state.isHistoryHidden);
+  onLoadHistory(state.stateHistory);
+  onTogglePanelHistory(state.isHistoryHidden);
 }
 
-function loadHistory(stateHistory) {
+function onLoadHistory(stateHistory) {
   const listHistory = document.querySelector("#listHistory");
-
   listHistory.innerHTML = "";
 
   (stateHistory || []).forEach((item, index) => {
     listHistory.insertAdjacentHTML(
       "beforeend",
       `<li class="list-group-item">
-          <a href = "?videoUrl=${item}">
-            ${item}
+          <a href = "?videoUrl=${item.url}"
+              title = ${item.text || ""} >
+            ${item.text || item.url}
           </a>
           <button
           class = "btn-remove"  
-          onclick="btnRemoveClick(${index})">X</button>
+          onclick="onRemoveClick(${index})">X</button>
         </li>`
     );
   });
 }
 
-function loadButtonState(isHistoryHidden = null) {
+function onTogglePanelHistory(isHistoryHidden = null) {
   document.body.classList.toggle("is-history-hidden", isHistoryHidden);
 }
 
-function btnRemoveClick(index) {
+function onRemoveClick(index) {
   if (confirm("Are you sure to want to remove this video url?")) {
     removeVideoFromHistory(index);
     syncState();
@@ -87,24 +86,25 @@ function btnRemoveClick(index) {
 
 function onToggleHistoryClick() {
   updateToggleHistory();
-  loadButtonState(state.isHistoryHidden);
+  onTogglePanelHistory(state.isHistoryHidden);
 }
 
 function attachAnchorListeners() {
   const anchors = document.querySelectorAll("a");
 
-  anchors.forEach((anchor) => {
-    anchor.addEventListener("mouseover", async function _mouseover() {
-      const utubeURL = parseParamVideoUrl(anchor.href)[0];
+  anchors.forEach((anchor, index) => {
+    if (!anchor.title) {
+      debugger;
+      anchor.addEventListener("mouseover", async function _onMouseOver() {
+        const utubeURL = parseParamVideoUrl(anchor.href)[0];
+        const title = await findTitle(utubeURL);
 
-      const title = await fetch(
-        "https://textance.herokuapp.com/title/" + utubeURL
-      ).then((res) => res.text());
+        anchor.setAttribute("title", title);
+        anchor.innerText = title;
 
-      anchor.setAttribute("title", title);
-      anchor.innerText = title;
-
-      anchor.removeEventListener("mouseover", _mouseover);
-    });
+        anchor.removeEventListener("mouseover", _onMouseOver);
+        updateTextLink(index, title);
+      });
+    }
   });
 }

@@ -18,21 +18,42 @@ function updateToggleHistory() {
 }
 
 function updateHistory(videoUrl) {
-  if (state.stateHistory.includes(videoUrl)) return;
-  state.stateHistory.push(videoUrl);
+  if (
+    state.stateHistory.includes(videoUrl) ||
+    state.stateHistory.find((st) => st.url === videoUrl)
+  )
+    return;
+
+  state.stateHistory.push({
+    text: null,
+    url: videoUrl,
+  });
   updateState();
 }
 
 function loadState() {
   const plainState = localStorage.getItem(HISTORY_KEY);
   const testState = plainState ? JSON.parse(plainState) : {};
-  if (testState.stateHistory) {
+  // old data model
+  if (testState && typeof testState?.stateHistory[0] === "string") {
+    testState.stateHistory = testState.stateHistory.map((url) => ({
+      url,
+    }));
+    state = testState;
+  }
+  // new data model
+  else if (testState) {
     state = testState;
   }
 }
 
 function removeVideoFromHistory(index) {
   state.stateHistory.splice(index, 1);
+  updateState();
+}
+
+function updateTextLink(index, title) {
+  state.stateHistory[index].text = title;
   updateState();
 }
 
@@ -70,4 +91,10 @@ function parseParamVideoUrl(search) {
   var REGEX = new RegExp(`(?<=${PARAM_NAME}=).*$`);
   const videoUrl = search.match(REGEX);
   return videoUrl;
+}
+
+function findTitle(utubeURL) {
+  return fetch("https://textance.herokuapp.com/title/" + utubeURL).then((res) =>
+    res.text()
+  );
 }
