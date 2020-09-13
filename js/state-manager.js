@@ -67,6 +67,16 @@ function getYoutubeVideoCode(rawUrl) {
   return videoCode;
 }
 
+function getYoutubeVideoCodeFromFB(rawUrl) {
+  const url = rawUrl.split("&")[0];
+
+  const REGEX = /(?<=(watch%3Fv%3D))(.*)(?=(%26fbclid))/;
+  const matches = (url + " ").match(REGEX);
+  const videoCode = (matches || []).length > 0 ? matches[0] : null;
+
+  return videoCode;
+}
+
 function updateState() {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(state));
 }
@@ -79,6 +89,9 @@ function parseInputVideoUrl(rawVideoUrl) {
     source = rawVideoUrl;
   } else {
     parsedUrl = getYoutubeVideoCode(rawVideoUrl);
+    if (!parsedUrl) {
+      parsedUrl = getYoutubeVideoCodeFromFB(rawVideoUrl);
+    }
     source = template + parsedUrl;
   }
 
