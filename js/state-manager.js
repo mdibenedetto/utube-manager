@@ -60,21 +60,22 @@ function updateTextLink(index, title) {
 function getYoutubeVideoCode(rawUrl) {
   const url = rawUrl.split("&")[0];
 
-  const REGEX = /(?<=watch\?v=).*(?=[&\s])/;
-  const matches = (url + " ").match(REGEX);
-  const videoCode = (matches || []).length > 0 ? matches[0] : null;
+  const FB_REGEXs = [
+    /(?<=(watch%3Fv%3D))(.*)(?=(%26fbclid))/,
+    /(?<=(youtu.be%2F))(.*)(?=(%3Ffbclid))/,
+  ];
+  const YT_REGEX = /(?<=watch\?v=).*(?=[&\s])/;
+  const REGEXs = [...FB_REGEXs, YT_REGEX];
 
-  return videoCode;
-}
+  for (const REGEX of REGEXs) {
+    const matches = (url + " ").match(REGEX);
+    const videoCode = (matches || []).length > 0 ? matches[0] : null;
+    if (videoCode) {
+      return videoCode;
+    }
+  }
 
-function getYoutubeVideoCodeFromFB(rawUrl) {
-  const url = rawUrl.split("&")[0];
-
-  const REGEX = /(?<=(watch%3Fv%3D))(.*)(?=(%26fbclid))/;
-  const matches = (url + " ").match(REGEX);
-  const videoCode = (matches || []).length > 0 ? matches[0] : null;
-
-  return videoCode;
+  return null;
 }
 
 function updateState() {
@@ -89,9 +90,6 @@ function parseInputVideoUrl(rawVideoUrl) {
     source = rawVideoUrl;
   } else {
     parsedUrl = getYoutubeVideoCode(rawVideoUrl);
-    if (!parsedUrl) {
-      parsedUrl = getYoutubeVideoCodeFromFB(rawVideoUrl);
-    }
     source = template + parsedUrl;
   }
 
