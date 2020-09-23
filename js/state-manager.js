@@ -63,6 +63,7 @@ function getYoutubeVideoCode(rawUrl) {
   const FB_REGEXs = [
     /(?<=(watch%3Fv%3D))(.*)(?=(%26fbclid))/,
     /(?<=(youtu.be%2F))(.*)(?=(%3Ffbclid))/,
+    /(?<=(youtu.be\/))(.*)/,
   ];
   const YT_REGEX = /(?<=watch\?v=).*(?=[&\s])/;
   const REGEXs = [...FB_REGEXs, YT_REGEX];
